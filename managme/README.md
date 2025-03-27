@@ -1,12 +1,52 @@
-# React + Vite
+# 🛠️ ManagMe 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
+## 🔧 Jak uruchomić projekt lokalnie
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. Sklonuj repozytorium
 
-## Expanding the ESLint configuration
+```bash
+git clone https://github.com/twoj-login/MenageMe-2.git
+cd MenageMe-2
+```
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 2. Zainstaluj zależności frontendowe
+
+```bash
+npm install
+```
+
+### 3. Uruchom aplikację frontend (Vite)
+
+```bash
+npm run dev
+```
+
+Domyślnie aplikacja uruchomi się na `http://localhost:5173`
+
+---
+
+### 4. Uruchom backend (miniapi)
+
+```bash
+cd src/miniapi
+npm install
+node index.js
+```
+
+Backend działa na porcie `http://localhost:3001`
+
+---
+
+## 👤 Przykładowi użytkownicy do logowania
+
+| Login | Hasło | Rola      |
+|-------|-------|-----------|
+| admin | admin | admin     |
+| dev   | dev   | developer |
+| ops   | ops   | devops    |
+
+---
+
+> Dane użytkowników są mockowane – logowanie działa z wykorzystaniem JWT tokenu i lokalnego `miniapi`.
