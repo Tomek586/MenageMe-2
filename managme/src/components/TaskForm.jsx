@@ -2,28 +2,35 @@ import { useState } from "react";
 import { api } from "../services/api";
 
 export const TaskForm = ({ storyId, onTaskAdded }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('low');
-  const [estimatedTime, setEstimatedTime] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [estimatedTime, setEstimatedTime] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const newTask = {
       id: Date.now(),
       name,
       description,
       priority,
-      storyId, // Upewnij się, że storyId jest poprawnie przypisane
       estimatedTime,
-      state: 'todo',
+      storyId,
+      state: "todo",
       createdAt: new Date().toISOString(),
+      assignedUserId: null,
+      startDate: null,
+      endDate: null,
+      workHours: null,
     };
+
     api.addTask(newTask);
-    onTaskAdded(); // Wywołaj tę funkcję, aby odświeżyć listę zadań
-    setName('');
-    setDescription('');
-    setEstimatedTime('');
+    onTaskAdded();
+    setName("");
+    setDescription("");
+    setPriority("medium");
+    setEstimatedTime("");
   };
 
   return (
@@ -37,8 +44,7 @@ export const TaskForm = ({ storyId, onTaskAdded }) => {
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
-        <input
-          type="text"
+        <textarea
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -50,13 +56,13 @@ export const TaskForm = ({ storyId, onTaskAdded }) => {
           onChange={(e) => setPriority(e.target.value)}
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+          <option value="low">Niski</option>
+          <option value="medium">Średni</option>
+          <option value="high">Wysoki</option>
         </select>
         <input
-          type="text"
-          placeholder="Estimated Time"
+          type="number"
+          placeholder="Estimated Hours"
           value={estimatedTime}
           onChange={(e) => setEstimatedTime(e.target.value)}
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

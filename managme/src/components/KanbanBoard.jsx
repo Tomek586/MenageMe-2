@@ -1,22 +1,6 @@
-import { api } from "../services/api";
-import { useState, useEffect } from "react";
-
-export const KanbanBoard = ({ storyId }) => { // Przyjmujemy storyId zamiast projectId
-  const [tasks, setTasks] = useState([]);
-
-  useEffect(() => {
-    const allTasks = api.getTasks();
-    const storyTasks = allTasks.filter(task => task.storyId === storyId); // Filtruj zadania według storyId
-    setTasks(storyTasks);
-  }, [storyId]);
-
-  const handleDeleteTask = (id) => {
-    api.deleteTask(id);
-    setTasks(api.getTasks().filter(task => task.storyId === storyId)); // Odśwież listę zadań
-  };
-
+export const KanbanBoard = ({tasks, onDeleteTask, onShowDetails }) => {
   const getTasksByState = (state) => {
-    return tasks.filter(task => task.state === state);
+    return tasks.filter((task) => task.state === state);
   };
 
   return (
@@ -35,13 +19,20 @@ export const KanbanBoard = ({ storyId }) => { // Przyjmujemy storyId zamiast pro
                   </div>
                   <div className="mt-2 flex space-x-4">
                     <button
-                      onClick={() => handleDeleteTask(task.id)}
+                      onClick={() => onDeleteTask(task.id)}
                       className="bg-red-500 text-black px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
                     >
                       Delete
                     </button>
                   </div>
+                  <button
+                    onClick={() => onShowDetails(task)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    Details
+                  </button>
                 </li>
+                
               ))}
             </ul>
           </div>

@@ -16,19 +16,20 @@ export const ProjectForm = ({
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		const newProject = {
-			id: projectToEdit ? projectToEdit.id : Date.now(),
-			name,
-			description,
+		  id: projectToEdit ? projectToEdit.id : Date.now(),
+		  name,
+		  description,
 		};
 		if (projectToEdit) {
-			api.updateProject(newProject); // Edycja projektu
+		  api.updateProject(newProject);
 		} else {
-			api.addProject(newProject); // Dodanie nowego projektu
+		  api.addProject(newProject);
 		}
-		onProjectAdded(); // Odśwież listę projektów
+		// Call the callback with the updated projects list
+		onProjectAdded(api.getProjects());
 		setName("");
 		setDescription("");
-	};
+	  };
 
 	return (
 		<form onSubmit={handleSubmit} className="mb-6">
