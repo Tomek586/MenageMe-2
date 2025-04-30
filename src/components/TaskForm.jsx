@@ -56,9 +56,9 @@ export const TaskForm = ({ storyId, onTaskAdded }) => {
           onChange={(e) => setPriority(e.target.value)}
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="low">Niski</option>
-          <option value="medium">Średni</option>
-          <option value="high">Wysoki</option>
+          <option className="dark:bg-sky-700" value="low">Niski</option>
+          <option className="dark:bg-sky-700" value="medium">Średni</option>
+          <option className="dark:bg-sky-700" value="high">Wysoki</option>
         </select>
         <input
           type="number"

@@ -101,7 +101,7 @@ export const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 bg-white dark:bg-gray-800 dark:text-white">
       <Navbar />
       <div className="container mx-auto p-4">
         <div className="grid grid-cols-3 gap-4">

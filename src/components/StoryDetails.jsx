@@ -18,7 +18,7 @@ export const StoryDetails = ({ story, onClose }) => {
   };
 
   return (
-    <div className="bg-white p-6 mt-4 rounded-lg shadow-md">
+    <div className="bg-white border p-6 mt-4 rounded-lg shadow-md dark:bg-gray-800 dark:text-white dark:border-black dark:border-3 ">
       <h2 className="text-xl font-bold mb-2">{story.name}</h2>
       <p className="text-gray-600 mb-2">{story.description}</p>
       <p><strong>Priorytet:</strong> {story.priority}</p>

@@ -4,7 +4,7 @@ export const KanbanBoard = ({tasks, onDeleteTask, onShowDetails }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:text-white">
       <h2 className="text-xl font-bold mb-4">Tasks</h2>
       <div className="flex space-x-4">
         {["todo", "doing", "done"].map((state) => (
@@ -12,7 +12,7 @@ export const KanbanBoard = ({tasks, onDeleteTask, onShowDetails }) => {
             <h3 className="text-lg font-bold mb-2">{state.toUpperCase()}</h3>
             <ul>
               {getTasksByState(state).map((task) => (
-                <li key={task.id} className="mb-4 border p-4 rounded-lg">
+                <li key={task.id} className="mb-4 border p-4 rounded-lg dark:border-black dark:border-3">
                   <div>
                     <h4 className="font-bold text-blue-500">{task.name}</h4>
                     <p className="text-gray-600">{task.description}</p>

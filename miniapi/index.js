@@ -69,7 +69,12 @@ app.get("/me", (req, res) => {
   const token = auth.split(" ")[1];
   try {
     const decoded = verifyAccessToken(token);
-    res.json(decoded); // Zwróć dane z tokena
+
+    const user = users.find((u) => u.id === decoded.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const { password, ...userData } = user;
+    res.json(userData);
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
   }

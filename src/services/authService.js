@@ -18,15 +18,23 @@ export const fetchUser = async () => {
   const token = localStorage.getItem("accessToken");
   if (!token) return null;
 
-  const res = await fetch(`${API_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  try {
+    const res = await fetch(`${API_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  if (!res.ok) return null;
+    if (!res.ok) {
+      console.error("Token nieważny lub błąd serwera.");
+      return null;
+    }
 
-  return res.json();
+    return await res.json();
+  } catch (err) {
+    console.error("Błąd pobierania użytkownika:", err);
+    return null;
+  }
 };
 
 export const logout = () => {

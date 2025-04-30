@@ -15,21 +15,21 @@ export const ProjectList = ({ projects, onSelectProject, onEditProject, onProjec
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:text-white  ">
       <h2 className="text-xl font-bold mb-4">Projects</h2>
       <ul>
         {projects.map((project) => (
           <li
             key={project.id}
-            className={`mb-4 border p-4 rounded-lg ${
-              selectedProjectId === project.id ? "bg-blue-100" : "bg-white"
+            className={`mb-4 border p-4 rounded-lg dark:bg-gray-800 dark:text-white dark:border-black dark:border-3 ${
+              selectedProjectId === project.id ? "dark:bg-sky-800 bg-blue-100" : "bg-white"
             }`}
           >
             <div>
               <h3 className="font-bold text-blue-500">{project.name}</h3>
-              <p className="text-gray-600">{project.description}</p>
+              <p className="text-gray-600 dark:text-white">{project.description}</p>
             </div>
-            <div className="mt-2 flex space-x-4">
+            <div className="mt-2 flex space-x-4 ">
               <button
                 onClick={() => handleSelectProject(project)}
                 className="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"

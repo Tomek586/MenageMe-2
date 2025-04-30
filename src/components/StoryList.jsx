@@ -29,13 +29,13 @@ export const StoryList = ({ projectId, onSelectStory, onStoryDetails, refreshKey
     filter === "all" ? stories : stories.filter((story) => story.state === filter);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:text-white ">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Stories</h2>
-        <select
+        <h2 className="text-xl font-bold ">Stories</h2>
+        <select 
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="border p-2 rounded"
+          className="border p-2 rounded dark:bg-sky-700 "
         >
           <option value="all">Wszystkie</option>
           <option value="todo">Do zrobienia</option>
@@ -48,14 +48,14 @@ export const StoryList = ({ projectId, onSelectStory, onStoryDetails, refreshKey
         {filteredStories.map((story) => (
           <li
             key={story.id}
-            className={`mb-4 border p-4 rounded-lg ${
-              selectedStoryId === story.id ? "bg-blue-100" : "bg-white"
+            className={`mb-4 border p-4 rounded-lg dark:bg-gray-800 dark:text-white dark:border-black dark:border-3 ${
+              selectedStoryId === story.id ? "dark:bg-sky-800 bg-blue-100" : "bg-white"
             }`}
           >
-            <div>
+            <div >
               <h3 className="font-bold text-blue-500">{story.name}</h3>
-              <p className="text-gray-600">{story.description}</p>
-              <p className="text-sm text-gray-500">Status: {story.state}</p>
+              <p className="text-gray-600 dark:text-white">{story.description}</p>
+              <p className="text-sm text-gray-500 dark:text-white"><b>Status: </b>{story.state}</p>
             </div>
             <div className="mt-2 flex space-x-2">
               <button

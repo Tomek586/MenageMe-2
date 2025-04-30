@@ -45,9 +45,9 @@ export const TaskDetails = ({ taskId, onClose }) => {
   const story = api.getStories().find((s) => s.id === task.storyId);
 
   return (
-    <div className="border p-4 bg-white rounded shadow mt-4">
+    <div className="border p-4 bg-white rounded shadow mt-4 dark:bg-gray-800 dark:text-white dark:border-black dark:border-black dark:border-3">
       <h2 className="text-xl font-bold mb-2">{task.name}</h2>
-      <p className="text-gray-700 mb-2">{task.description}</p>
+      <p className="text-gray-700 mb-2 dark:text-white">{task.description}</p>
       <p><strong>Priority:</strong> {task.priority}</p>
       <p><strong>Status:</strong> {task.state}</p>
       <p><strong>Estimated Time:</strong> {task.estimatedTime}</p>
@@ -67,24 +67,24 @@ export const TaskDetails = ({ taskId, onClose }) => {
 
       {task.state === "todo" && (
         <div className="mt-4">
-          <label className="block mb-1">Assign to:</label>
+          <label className="block mb-1"> Assign to:</label>
           <select
             value={assignedUser}
             onChange={(e) => setAssignedUser(e.target.value)}
-            className="border p-2 rounded mb-2"
+            className="border p-2 rounded mb-2 dark:border-black dark:border-2"
           >
             <option value="">Select User</option>
             {users
               .filter((u) => u.role !== "admin")
               .map((user) => (
-                <option key={user.id} value={user.id}>
+                <option className="dark:bg-sky-700" key={user.id} value={user.id}>
                   {user.firstName} {user.lastName} ({user.role})
                 </option>
               ))}
           </select>
           <button
             onClick={handleAssignUser}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 "
           >
             Assign & Start
           </button>
