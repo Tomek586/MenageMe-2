@@ -4,79 +4,48 @@ import { jwtDecode } from "jwt-decode";
 
 export const Navbar = () => {
   const [user, setUser] = useState(null);
-  const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-
+  const [isDark, setIsDark] = useState(() => localStorage.getItem("theme") === "dark");
   const [sessionTimeLeft, setSessionTimeLeft] = useState(null);
 
-  // Pobierz użytkownika i oblicz czas do końca sesji
   useEffect(() => {
     const loadUser = async () => {
-      const data = await fetchUser();
-      setUser(data);
-
+      const u = await fetchUser();
+      setUser(u);
       const token = localStorage.getItem("accessToken");
       if (token) {
-        const decoded = jwtDecode(token);
-        if (decoded.exp) {
-          const expireAt = decoded.exp * 1000;
-          updateTimeLeft(expireAt);
-        }
+        const { exp } = jwtDecode(token);
+        updateTimeLeft(exp * 1000);
       }
     };
     loadUser();
   }, []);
 
-  // Ustaw interwał odliczania
   useEffect(() => {
-    const interval = setInterval(() => {
+    const tick = setInterval(() => {
       const token = localStorage.getItem("accessToken");
       if (token) {
-        const decoded = jwtDecode(token);
-        const expireAt = decoded.exp * 1000;
-        updateTimeLeft(expireAt);
+        const { exp } = jwtDecode(token);
+        updateTimeLeft(exp * 1000);
       }
     }, 1000);
-
-    return () => clearInterval(interval);
+    return () => clearInterval(tick);
   }, []);
 
-  // Aktualizuj licznik
   const updateTimeLeft = (expireAt) => {
-    const now = Date.now();
-    const diff = expireAt - now;
-
-    if (diff <= 0) {
-      logout();
-      window.location.reload();
-    } else {
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      setSessionTimeLeft(`${minutes}:${seconds.toString().padStart(2, "0")}`);
-    }
+    const diff = expireAt - Date.now();
+    if (diff <= 0) return logout() && window.location.reload();
+    const m = Math.floor(diff / 60000),
+      s = Math.floor((diff % 60000) / 1000)
+        .toString()
+        .padStart(2, "0");
+    setSessionTimeLeft(`${m}:${s}`);
   };
 
-  // Obsługa trybu ciemnego
   useEffect(() => {
     const html = document.documentElement;
-    if (isDark) {
-      html.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      html.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    isDark ? html.classList.add("dark") : html.classList.remove("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
-
-  const handleLogout = () => {
-    logout();
-    window.location.reload();
-  };
-
-  const toggleTheme = () => {
-    setIsDark((prev) => !prev);
-  };
 
   return (
     <nav className="bg-blue-600 dark:bg-gray-900 text-white p-4">
@@ -89,26 +58,21 @@ export const Navbar = () => {
                 Welcome, {user.firstName} {user.lastName} ({user.role})
               </p>
               {sessionTimeLeft && (
-                <p className="text-sm text-white/80">
-                  Sesja wygaśnie za: {sessionTimeLeft}
-                </p>
+                <p className="text-sm">Sesja wygasa za: {sessionTimeLeft}</p>
               )}
             </>
           ) : (
-            <p>Ładowanie użytkownika...</p>
+            <p>Ładowanie...</p>
           )}
         </div>
         <div className="flex items-center gap-4">
           <button
-            onClick={toggleTheme}
-            className="bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-4 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+            onClick={() => setIsDark((d) => !d)}
+            className="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded"
           >
-            {isDark ? " Jasny" : " Ciemny"}
+            {isDark ? "Jasny" : "Ciemny"}
           </button>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
-          >
+          <button onClick={() => (logout(), window.location.reload())} className="bg-red-500 px-4 py-2 rounded">
             Wyloguj
           </button>
         </div>

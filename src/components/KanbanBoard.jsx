@@ -1,7 +1,6 @@
-export const KanbanBoard = ({tasks, onDeleteTask, onShowDetails }) => {
-  const getTasksByState = (state) => {
-    return tasks.filter((task) => task.state === state);
-  };
+export const KanbanBoard = ({ tasks, onDeleteTask, onShowDetails }) => {
+  const getTasksByState = (state) =>
+    Array.isArray(tasks) ? tasks.filter((task) => task.state === state) : [];
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:text-white">
@@ -12,27 +11,31 @@ export const KanbanBoard = ({tasks, onDeleteTask, onShowDetails }) => {
             <h3 className="text-lg font-bold mb-2">{state.toUpperCase()}</h3>
             <ul>
               {getTasksByState(state).map((task) => (
-                <li key={task.id} className="mb-4 border p-4 rounded-lg dark:border-black dark:border-3">
+                <li
+                  key={task._id}
+                  className="mb-4 border p-4 rounded-lg dark:border-gray-700"
+                >
                   <div>
                     <h4 className="font-bold text-blue-500">{task.name}</h4>
-                    <p className="text-gray-600">{task.description}</p>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      {task.description}
+                    </p>
                   </div>
-                  <div className="mt-2 flex space-x-4">
+                  <div className="mt-2 flex space-x-2">
                     <button
-                      onClick={() => onDeleteTask(task.id)}
-                      className="bg-red-500 text-black px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+                      onClick={() => onShowDetails(task)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Details
+                    </button>
+                    <button
+                      onClick={() => onDeleteTask(task._id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-colors"
                     >
                       Delete
                     </button>
                   </div>
-                  <button
-                    onClick={() => onShowDetails(task)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    Details
-                  </button>
                 </li>
-                
               ))}
             </ul>
           </div>
@@ -41,3 +44,5 @@ export const KanbanBoard = ({tasks, onDeleteTask, onShowDetails }) => {
     </div>
   );
 };
+
+export default KanbanBoard;

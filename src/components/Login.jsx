@@ -1,49 +1,51 @@
 import { useState } from "react";
-import { login } from "../services/authService";
+import { login, loginWithGoogle } from "../services/authService";
+import { GoogleLogin } from "@react-oauth/google";
 
 export const Login = ({ onLoginSuccess }) => {
-  const [loginInput, setLoginInput] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(loginInput, password);
+      await login(email, password);
       onLoginSuccess();
-    } catch (err) {
-      setError("Invalid login or password", err);
+    } catch {
+      alert("Błędne dane");
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-200">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-80">
-        <h2 className="text-xl font-bold mb-4">Login</h2>
-        {error && <p className="text-red-500">{error}</p>}
+    <div className="p-4 max-w-md mx-auto">
+      <h2 className="text-xl mb-4">Logowanie</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
-          type="text"
-          placeholder="Login"
-          value={loginInput}
-          onChange={(e) => setLoginInput(e.target.value)}
-          className="border p-2 w-full mb-4 rounded"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full border p-2 rounded"
           required
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Hasło"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 w-full mb-4 rounded"
+          className="w-full border p-2 rounded"
           required
         />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white w-full p-2 rounded hover:bg-blue-600"
-        >
-          Log In
+        <button className="w-full bg-blue-600 text-white p-2 rounded">
+          Zaloguj
         </button>
       </form>
+      <div className="mt-6 text-center">
+        <GoogleLogin
+          onSuccess={(res) => loginWithGoogle(res.credential).then(onLoginSuccess)}
+          onError={() => alert("Błąd logowania Google")}
+        />
+      </div>
     </div>
   );
 };

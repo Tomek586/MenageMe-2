@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "../services/api";
+import * as taskService from "../services/taskService";
 
 export const TaskForm = ({ storyId, onTaskAdded }) => {
   const [name, setName] = useState("");
@@ -7,30 +7,28 @@ export const TaskForm = ({ storyId, onTaskAdded }) => {
   const [priority, setPriority] = useState("medium");
   const [estimatedTime, setEstimatedTime] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     const newTask = {
-      id: Date.now(),
       name,
       description,
       priority,
-      estimatedTime,
+      estimatedTime: Number(estimatedTime),
       storyId,
-      state: "todo",
-      createdAt: new Date().toISOString(),
-      assignedUserId: null,
-      startDate: null,
-      endDate: null,
-      workHours: null,
+      // backend ustawia reszte
     };
 
-    api.addTask(newTask);
-    onTaskAdded();
-    setName("");
-    setDescription("");
-    setPriority("medium");
-    setEstimatedTime("");
+    try {
+      await taskService.addTask(newTask);
+      onTaskAdded();
+      setName("");
+      setDescription("");
+      setPriority("medium");
+      setEstimatedTime("");
+    } catch (err) {
+      console.error("Nie udało się dodać zadania:", err);
+      alert("Wystąpił błąd podczas dodawania zadania.");
+    }
   };
 
   return (
@@ -56,9 +54,9 @@ export const TaskForm = ({ storyId, onTaskAdded }) => {
           onChange={(e) => setPriority(e.target.value)}
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option className="dark:bg-sky-700" value="low">Niski</option>
-          <option className="dark:bg-sky-700" value="medium">Średni</option>
-          <option className="dark:bg-sky-700" value="high">Wysoki</option>
+          <option value="low">Niski</option>
+          <option value="medium">Średni</option>
+          <option value="high">Wysoki</option>
         </select>
         <input
           type="number"
@@ -67,6 +65,7 @@ export const TaskForm = ({ storyId, onTaskAdded }) => {
           onChange={(e) => setEstimatedTime(e.target.value)}
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
+          min="0"
         />
         <button
           type="submit"
@@ -78,3 +77,5 @@ export const TaskForm = ({ storyId, onTaskAdded }) => {
     </form>
   );
 };
+
+export default TaskForm;

@@ -1,38 +1,46 @@
-import { api } from "../services/api";
-import { useState } from "react";
+import React from "react";
+import { deleteProject as deleteProjectService } from "../services/projectService";
 
-export const ProjectList = ({ projects, onSelectProject, onEditProject, onProjectDeleted  }) => {
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
-
-  const handleDeleteProject = (id) => {
-	api.deleteProject(id);
-	setSelectedProjectId(null);
-	onProjectDeleted(); 
-  };
-  const handleSelectProject = (project) => {
-    setSelectedProjectId(project.id);
-    onSelectProject(project);
+const ProjectList = ({
+  projects,
+  selectedProjectId,
+  onSelectProject,
+  onEditProject,
+  onProjectDeleted,
+}) => {
+  const handleDeleteProject = async (id) => {
+    try {
+      await deleteProjectService(id);
+      onProjectDeleted();
+    } catch (err) {
+      console.error("Nie udało się usunąć projektu:", err);
+      alert("Błąd przy usuwaniu projektu.");
+    }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:text-white  ">
+    <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:text-white">
       <h2 className="text-xl font-bold mb-4">Projects</h2>
       <ul>
         {projects.map((project) => (
           <li
-            key={project.id}
-            className={`mb-4 border p-4 rounded-lg dark:bg-gray-800 dark:text-white dark:border-black dark:border-3 ${
-              selectedProjectId === project.id ? "dark:bg-sky-800 bg-blue-100" : "bg-white"
-            }`}
+            key={project._id}
+            className={`mb-4 border p-4 rounded-lg transition-colors cursor-pointer ${
+              selectedProjectId === project._id
+                ? "bg-blue-100 dark:bg-sky-800"
+                : "bg-white dark:bg-gray-800"
+            } dark:text-white`}
           >
-            <div>
+            <div onClick={() => onSelectProject(project)}>
               <h3 className="font-bold text-blue-500">{project.name}</h3>
-              <p className="text-gray-600 dark:text-white">{project.description}</p>
+              <p className="text-gray-600 dark:text-gray-300">
+                {project.description}
+              </p>
             </div>
-            <div className="mt-2 flex space-x-4 ">
+            <div className="mt-2 flex space-x-2">
               <button
-                onClick={() => handleSelectProject(project)}
-                className="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                onClick={() => onSelectProject(project)}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
               >
                 Select
               </button>
@@ -43,8 +51,8 @@ export const ProjectList = ({ projects, onSelectProject, onEditProject, onProjec
                 Edit
               </button>
               <button
-                onClick={() => handleDeleteProject(project.id)}
-                className="bg-red-500 text-black px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+                onClick={() => handleDeleteProject(project._id)}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
               >
                 Delete
               </button>
@@ -55,3 +63,5 @@ export const ProjectList = ({ projects, onSelectProject, onEditProject, onProjec
     </div>
   );
 };
+
+export default ProjectList;

@@ -1,21 +1,30 @@
+// src/App.jsx
 import { useState, useEffect, useRef } from "react";
 import { Navbar } from "./components/Navbar";
 import { ProjectForm } from "./components/ProjectForm";
-import { ProjectList } from "./components/ProjectList";
+import  ProjectList  from "./components/ProjectList";
 import { StoryForm } from "./components/StoryForm";
-import { StoryList } from "./components/StoryList";
+import StoryList from "./components/StoryList";
 import { TaskForm } from "./components/TaskForm";
-import { TaskDetails } from "./components/TaskDetails";
+import  TaskDetails  from "./components/TaskDetails";
 import { KanbanBoard } from "./components/KanbanBoard";
 import { Login } from "./components/Login";
-import { StoryDetails } from "./components/StoryDetails";
+import StoryDetails from "./components/StoryDetails";
 
-import { fetchUser, isLoggedIn, logout } from "./services/authService";
-import { api } from "./services/api";
+import {
+  fetchUser,
+  logout,
+  isLoggedIn,
+} from "./services/authService";
+
+import * as projectService from "./services/projectService";
+import * as storyService from "./services/storyService";
+import * as taskService from "./services/taskService";
 
 export const App = () => {
   const [user, setUser] = useState(null);
-  const [projects, setProjects] = useState(api.getProjects());
+
+  const [projects, setProjects] = useState([]);
   const [stories, setStories] = useState([]);
   const [tasks, setTasks] = useState([]);
 
@@ -29,33 +38,85 @@ export const App = () => {
   const taskDetailsRef = useRef(null);
   const storyDetailsRef = useRef(null);
 
+  // --- ładowanie użytkownika
   useEffect(() => {
-    const loadUser = async () => {
-      const data = await fetchUser();
-      if (data) setUser(data);
-      else logout();
+    const init = async () => {
+      if (isLoggedIn()) {
+        const me = await fetchUser();
+        if (!me) return logout();
+        setUser(me);
+      }
     };
-    if (isLoggedIn()) loadUser();
+    init();
   }, []);
 
-  // ⬇️ automatyczne wczytanie zadań po wyborze historii
+  // --- ładowanie projektów po zalogowaniu
   useEffect(() => {
-    if (selectedStory) {
-      const storyTasks = api.getTasks().filter(task => task.storyId === selectedStory.id);
-      setTasks(storyTasks);
-    } else {
-      setTasks([]);
-    }
+    const loadProjects = async () => {
+      try {
+        const data = await projectService.getProjects();
+        setProjects(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to load projects:", err);
+        setProjects([]);
+      }
+    };
+    if (user) loadProjects();
+  }, [user]);
+
+  // --- ładowanie historyjek po wyborze projektu lub refreshKey
+  useEffect(() => {
+    const loadStories = async () => {
+      if (!selectedProject) return setStories([]);
+      try {
+        const all = await storyService.getStories();
+        const arr = Array.isArray(all) ? all : [];
+        setStories(arr.filter((s) => s.projectId === selectedProject._id));
+      } catch (err) {
+        console.error("Failed to load stories:", err);
+        setStories([]);
+      }
+    };
+    loadStories();
+  }, [selectedProject, storyRefreshKey]);
+
+  // --- ładowanie zadań po wyborze historyjki
+  useEffect(() => {
+    const loadTasks = async () => {
+      if (!selectedStory) {
+        setTasks([]);
+        return;
+      }
+      try {
+        const all = await taskService.getTasks();
+        const arr = Array.isArray(all) ? all : [];
+        setTasks(arr.filter((t) => t.storyId === selectedStory._id));
+        console.log("Loaded tasks:", arr);
+      } catch (err) {
+        console.error("Failed to load tasks:", err);
+        setTasks([]);
+      }
+    };
+    loadTasks();
   }, [selectedStory]);
 
-  const handleLoginSuccess = async () => {
-    const data = await fetchUser();
-    setUser(data);
+  // --- po udanym logowaniu
+  const handleLoginSuccess = () => {
+    fetchUser().then((me) => {
+      if (!me) return logout();
+      setUser(me);
+    });
   };
 
-  const handleProjectAdded = () => {
-    setProjects(api.getProjects());
-    setProjectToEdit(null);
+  // --- po dodaniu projektu
+  const handleProjectAdded = async () => {
+    try {
+      const data = await projectService.getProjects();
+      setProjects(Array.isArray(data) ? data : []);
+      setProjectToEdit(null);
+    } catch {
+      setProjects([]);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -67,7 +128,23 @@ export const App = () => {
     setSelectedStory(null);
     setSelectedTask(null);
     setSelectedStoryDetails(null);
-    setTasks([]);
+  };
+
+  const handleProjectDeleted = async () => {
+    try {
+      const data = await projectService.getProjects();
+      setProjects(Array.isArray(data) ? data : []);
+      setSelectedProject(null);
+    } catch {
+      setProjects([]);
+    }
+  };
+
+  const handleShowStoryDetails = (story) => {
+    setSelectedStoryDetails(story);
+    setTimeout(() => {
+      storyDetailsRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   const handleSelectStory = (story) => {
@@ -75,24 +152,10 @@ export const App = () => {
     setSelectedTask(null);
   };
 
-  const handleProjectDeleted = () => {
-    setProjects(api.getProjects());
-    setSelectedProject(null);
-    setStories([]);
-    setSelectedStory(null);
-  };
-
   const handleShowTaskDetails = (task) => {
     setSelectedTask(task);
     setTimeout(() => {
-      taskDetailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
-  };
-
-  const handleShowStoryDetails = (story) => {
-    setSelectedStoryDetails(story);
-    setTimeout(() => {
-      storyDetailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      taskDetailsRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
@@ -101,11 +164,11 @@ export const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 bg-white dark:bg-gray-800 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
       <Navbar />
       <div className="container mx-auto p-4">
         <div className="grid grid-cols-3 gap-4">
-          {/* LEWA KOLUMNA – Projekty */}
+          {/* Projekty */}
           <div>
             {projectToEdit ? (
               <ProjectForm
@@ -118,8 +181,8 @@ export const App = () => {
                 <ProjectForm onProjectAdded={handleProjectAdded} />
                 <ProjectList
                   projects={projects}
+                  selectedProjectId={selectedProject?._id}
                   onSelectProject={handleSelectProject}
-                  onProjectAdded={handleProjectAdded}
                   onEditProject={setProjectToEdit}
                   onProjectDeleted={handleProjectDeleted}
                 />
@@ -127,19 +190,17 @@ export const App = () => {
             )}
           </div>
 
-          {/* ŚRODKOWA KOLUMNA – Historie */}
+          {/* Historyjki */}
           <div>
             {selectedProject && (
               <>
                 <StoryForm
-                  projectId={selectedProject.id}
-                  onStoryAdded={() => {
-                    setSelectedStory(null);
-                    setStoryRefreshKey(prev => prev + 1);
-                  }}
+                  projectId={selectedProject._id}
+                  onStoryAdded={() => setStoryRefreshKey((k) => k + 1)}
                 />
                 <StoryList
-                  projectId={selectedProject.id}
+                  projectId={selectedProject._id}
+                  stories={stories}
                   onSelectStory={handleSelectStory}
                   onStoryDetails={handleShowStoryDetails}
                   refreshKey={storyRefreshKey}
@@ -156,34 +217,44 @@ export const App = () => {
             )}
           </div>
 
-          {/* PRAWA KOLUMNA – Taski */}
+          {/* Zadania */}
           <div>
             {selectedStory && (
               <>
                 <TaskForm
-                  storyId={selectedStory.id}
-                  onTaskAdded={() => {
-                    const updated = api.getTasks().filter(task => task.storyId === selectedStory.id);
-                    setTasks(updated);
-                    setSelectedTask(null);
+                  storyId={selectedStory._id}
+                  onTaskAdded={async () => {
+                    try {
+                      const all = await taskService.getTasks();
+                      const arr = Array.isArray(all) ? all : [];
+                      setTasks(arr.filter((t) => t.storyId === selectedStory._id));
+                      setSelectedTask(null);
+                    } catch {
+                      setTasks([]);
+                    }
                   }}
                 />
                 <KanbanBoard
-                  storyId={selectedStory.id}
+                  storyId={selectedStory._id}
                   tasks={tasks}
-                  onDeleteTask={(id) => {
-                    api.deleteTask(id);
-                    const updated = api.getTasks().filter(task => task.storyId === selectedStory.id);
-                    setTasks(updated);
+                  onDeleteTask={async (id) => {
+                    await taskService.deleteTask(id);
+                    const all = await taskService.getTasks();
+                    const arr = Array.isArray(all) ? all : [];
+                    setTasks(arr.filter((t) => t.storyId === selectedStory._id));
                   }}
                   onShowDetails={handleShowTaskDetails}
                 />
                 {selectedTask && (
                   <div ref={taskDetailsRef}>
                     <TaskDetails
-                      taskId={selectedTask.id}
-                      onClose={() => setSelectedTask(null)}
-                    />
+     taskId={selectedTask._id}
+      onClose={() => setSelectedTask(null)}
+      onTaskUpdated={async () => {
+        const all = await taskService.getTasks();
+        setTasks(all.filter((t) => t.storyId === selectedStory._id));
+      }}
+    />
                   </div>
                 )}
               </>
@@ -194,3 +265,5 @@ export const App = () => {
     </div>
   );
 };
+
+export default App;

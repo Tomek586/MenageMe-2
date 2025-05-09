@@ -1,129 +1,155 @@
-import { useState, useEffect } from "react";
-import { api } from "../services/api";
+import React, { useState, useEffect } from "react";
+import { getTasks, updateTask } from "../services/taskService";
+import { getStories } from "../services/storyService";
 import { getUsers } from "../services/userService";
 
-export const TaskDetails = ({ taskId, onClose }) => {
+const TaskDetails = ({ taskId, onClose, onTaskUpdated }) => {
   const [task, setTask] = useState(null);
+  const [story, setStory] = useState(null);
   const [users, setUsers] = useState([]);
-  const [assignedUser, setAssignedUser] = useState("");
+  const [assignedUserId, setAssignedUserId] = useState("");
   const [workHours, setWorkHours] = useState("");
 
   useEffect(() => {
-    const loadedTask = api.getTasks().find((t) => t.id === taskId);
-    setTask(loadedTask);
-    setUsers(getUsers());
-    setAssignedUser(loadedTask?.assignedUserId || "");
-    setWorkHours(loadedTask?.workHours || "");
+    const load = async () => {
+      try {
+        const allTasks = await getTasks();
+        const found = allTasks.find((t) => t._id === taskId);
+        if (!found) return;
+        setTask(found);
+        setAssignedUserId(found.assignedUserId ?? "");
+        setWorkHours(found.workHours ?? "");
+
+        const allStories = await getStories();
+        setStory(allStories.find((s) => s._id === found.storyId) || null);
+
+        const us = await getUsers();
+        setUsers(us);
+      } catch (err) {
+        console.error("Failed to load task details:", err);
+      }
+    };
+    load();
   }, [taskId]);
-
-  const handleAssignUser = () => {
-    if (!assignedUser) return;
-    const updatedTask = {
-      ...task,
-      assignedUserId: assignedUser,
-      state: "doing",
-      startDate: new Date().toISOString(),
-    };
-    api.updateTask(updatedTask);
-    setTask(updatedTask);
-  };
-
-  const handleCompleteTask = () => {
-    const updatedTask = {
-      ...task,
-      state: "done",
-      endDate: new Date().toISOString(),
-      workHours: workHours,
-    };
-    api.updateTask(updatedTask);
-    setTask(updatedTask);
-  };
 
   if (!task) return <div>Loading...</div>;
 
-  const assignedUserObj = users.find((u) => u.id === Number(task.assignedUserId));
-  const story = api.getStories().find((s) => s.id === task.storyId);
+  const handleAssignUser = async () => {
+    if (!assignedUserId) return;
+    try {
+      const updated = {
+        ...task,
+        assignedUserId,
+        state: "doing",
+        startDate: new Date().toISOString(),
+      };
+      const saved = await updateTask(updated);
+      setTask(saved);
+      onTaskUpdated();
+    } catch (err) {
+      console.error("Failed to assign user:", err);
+      alert("Nie udało się przypisać użytkownika.");
+    }
+  };
+
+  const handleCompleteTask = async () => {
+    try {
+      const updated = {
+        ...task,
+        state: "done",
+        endDate: new Date().toISOString(),
+        workHours: Number(workHours),
+      };
+      const saved = await updateTask(updated);
+      setTask(saved);
+      onTaskUpdated();
+    } catch (err) {
+      console.error("Failed to complete task:", err);
+      alert("Nie udało się zakończyć zadania.");
+    }
+  };
+
+  const assignedObj = users.find((u) => u.id === task.assignedUserId);
 
   return (
-    <div className="border p-4 bg-white rounded shadow mt-4 dark:bg-gray-800 dark:text-white dark:border-black dark:border-black dark:border-3">
-      <h2 className="text-xl font-bold mb-2">{task.name}</h2>
-      <p className="text-gray-700 mb-2 dark:text-white">{task.description}</p>
-      <p><strong>Priority:</strong> {task.priority}</p>
+    <div className="border p-4 bg-white rounded shadow mt-4 dark:bg-gray-800 dark:text-white">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">{task.name}</h2>
+        <button onClick={onClose} className="text-red-500 hover:underline">
+          Zamknij
+        </button>
+      </div>
+
+      <p className="mb-2">{task.description}</p>
+      <p><strong>Priorytet:</strong> {task.priority}</p>
       <p><strong>Status:</strong> {task.state}</p>
-      <p><strong>Estimated Time:</strong> {task.estimatedTime}</p>
-      <p><strong>Created At:</strong> {new Date(task.createdAt).toLocaleString()}</p>
+      <p><strong>Szacowany czas:</strong> {task.estimatedTime} h</p>
+      <p><strong>Utworzono:</strong> {new Date(task.createdAt).toLocaleString()}</p>
       {task.startDate && (
-        <p><strong>Start Date:</strong> {new Date(task.startDate).toLocaleString()}</p>
+        <p><strong>Rozpoczęto:</strong> {new Date(task.startDate).toLocaleString()}</p>
       )}
       {task.endDate && (
-        <p><strong>End Date:</strong> {new Date(task.endDate).toLocaleString()}</p>
+        <p><strong>Zakończono:</strong> {new Date(task.endDate).toLocaleString()}</p>
       )}
       {story && (
-        <p><strong>Related Story:</strong> {story.name}</p>
+        <p><strong>Historyjka:</strong> {story.name}</p>
       )}
-      {assignedUserObj && (
-        <p><strong>Assigned To:</strong> {assignedUserObj.firstName} {assignedUserObj.lastName}</p>
+      {assignedObj && (
+        <p><strong>Przypisany:</strong> {assignedObj.firstName} {assignedObj.lastName}</p>
       )}
 
       {task.state === "todo" && (
         <div className="mt-4">
-          <label className="block mb-1"> Assign to:</label>
+          <label className="block mb-1">Przypisz do:</label>
           <select
-            value={assignedUser}
-            onChange={(e) => setAssignedUser(e.target.value)}
-            className="border p-2 rounded mb-2 dark:border-black dark:border-2"
+            value={assignedUserId}
+            onChange={(e) => setAssignedUserId(e.target.value)}
+            className="border p-2 rounded w-full mb-2 dark:bg-gray-700 dark:text-white"
           >
-            <option value="">Select User</option>
+            <option value="">Wybierz użytkownika</option>
             {users
               .filter((u) => u.role !== "admin")
-              .map((user) => (
-                <option className="dark:bg-sky-700" key={user.id} value={user.id}>
-                  {user.firstName} {user.lastName} ({user.role})
+              .map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.firstName} {u.lastName} ({u.role})
                 </option>
               ))}
           </select>
           <button
             onClick={handleAssignUser}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 "
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
-            Assign & Start
+            Przypisz i rozpocznij
           </button>
         </div>
       )}
 
       {task.state === "doing" && (
         <div className="mt-4">
-          <label className="block mb-1">Work Hours:</label>
+          <label className="block mb-1">Roboczogodziny:</label>
           <input
             type="number"
             min="0"
             value={workHours}
             onChange={(e) => setWorkHours(e.target.value)}
-            className="border p-2 rounded w-full mb-2"
+            className="border p-2 rounded w-full mb-2 dark:bg-gray-700 dark:text-white"
           />
           <button
             onClick={handleCompleteTask}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
           >
-            Complete Task
+            Zakończ zadanie
           </button>
         </div>
       )}
 
       {task.state === "done" && (
         <div className="mt-4">
-          <p><strong>Work Hours:</strong> {task.workHours} h</p>
+          <p><strong>Roboczogodziny:</strong> {task.workHours} h</p>
         </div>
       )}
-
-      <div className="mt-6">
-        <button
-          onClick={onClose}
-          className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-        >
-          Zamknij
-        </button>
-      </div>
     </div>
   );
 };
+
+export default TaskDetails;

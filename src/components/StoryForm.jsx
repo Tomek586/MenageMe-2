@@ -1,32 +1,44 @@
-import { useState } from "react";
-import { api } from "../services/api";
-import { getCurrentUser } from "../services/userService";
+import { useState, useEffect } from "react";
+import { fetchUser } from "../services/authService";
+import * as storyService from "../services/storyService";
 
 export const StoryForm = ({ projectId, onStoryAdded }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
+  const [user, setUser] = useState(null);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const load = async () => {
+      const u = await fetchUser();
+      setUser(u);
+    };
+    load();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) return alert("Nie załadowano użytkownika");
 
-    const user = getCurrentUser();
     const newStory = {
-      id: Date.now(),
       name,
       description,
       priority,
       projectId,
-      createdAt: new Date().toISOString(),
       state: "todo",
-      ownerId: user?.id || null,
+      ownerId: user._id,
     };
 
-    api.addStory(newStory);
-    onStoryAdded();
-    setName("");
-    setDescription("");
-    setPriority("medium");
+    try {
+      await storyService.addStory(newStory);
+      onStoryAdded();
+      setName("");
+      setDescription("");
+      setPriority("medium");
+    } catch (err) {
+      console.error("Błąd dodawania story:", err);
+      alert("Nie udało się dodać historyjki.");
+    }
   };
 
   return (
@@ -52,13 +64,14 @@ export const StoryForm = ({ projectId, onStoryAdded }) => {
           onChange={(e) => setPriority(e.target.value)}
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option className="dark:bg-sky-700" value="low">Niski</option>
-          <option className="dark:bg-sky-700" value="medium">Średni</option>
-          <option className="dark:bg-sky-700" value="high">Wysoki</option>
+          <option value="low">Niski</option>
+          <option value="medium">Średni</option>
+          <option value="high">Wysoki</option>
         </select>
         <button
           type="submit"
           className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"
+          disabled={!user}
         >
           Add Story
         </button>
@@ -66,3 +79,5 @@ export const StoryForm = ({ projectId, onStoryAdded }) => {
     </form>
   );
 };
+
+export default StoryForm;

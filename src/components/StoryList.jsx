@@ -1,41 +1,68 @@
-import { api } from "../services/api";
 import { useEffect, useState } from "react";
+import {
+  getStories,
+  deleteStory as deleteStoryService,
+} from "../services/storyService";
 
-export const StoryList = ({ projectId, onSelectStory, onStoryDetails, refreshKey }) => {
+export const StoryList = ({
+  projectId,
+  onSelectStory,
+  onStoryDetails,
+  refreshKey,
+}) => {
   const [stories, setStories] = useState([]);
   const [selectedStoryId, setSelectedStoryId] = useState(null);
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    const allStories = api.getStories();
-    const filtered = allStories.filter((story) => story.projectId === projectId);
-    setStories(filtered);
+    const load = async () => {
+      if (!projectId) {
+        setStories([]);
+        return;
+      }
+      try {
+        const all = await getStories();
+        setStories(
+          (Array.isArray(all) ? all : []).filter((s) => s.projectId === projectId)
+        );
+      } catch (err) {
+        console.error("Failed to load stories:", err);
+        setStories([]);
+      }
+    };
+    load();
   }, [projectId, refreshKey]);
 
-  const handleDeleteStory = (id) => {
-    api.deleteStory(id);
-    const updated = api.getStories().filter((s) => s.projectId === projectId);
-    setStories(updated);
-    setSelectedStoryId(null);
-    onSelectStory(null);
+  const handleDeleteStory = async (id) => {
+    try {
+      await deleteStoryService(id);
+      const all = await getStories();
+      setStories(
+        (Array.isArray(all) ? all : []).filter((s) => s.projectId === projectId)
+      );
+      setSelectedStoryId(null);
+      onSelectStory(null);
+    } catch (err) {
+      console.error("Failed to delete story:", err);
+    }
   };
 
   const handleSelectStory = (story) => {
-    setSelectedStoryId(story.id);
+    setSelectedStoryId(story._id);
     onSelectStory(story);
   };
 
   const filteredStories =
-    filter === "all" ? stories : stories.filter((story) => story.state === filter);
+    filter === "all" ? stories : stories.filter((s) => s.state === filter);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:text-white ">
+    <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:text-white">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold ">Stories</h2>
-        <select 
+        <h2 className="text-xl font-bold">Stories</h2>
+        <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="border p-2 rounded dark:bg-sky-700 "
+          className="border p-2 rounded dark:bg-gray-700 dark:text-white"
         >
           <option value="all">Wszystkie</option>
           <option value="todo">Do zrobienia</option>
@@ -43,36 +70,37 @@ export const StoryList = ({ projectId, onSelectStory, onStoryDetails, refreshKey
           <option value="done">Zrobione</option>
         </select>
       </div>
-
       <ul>
         {filteredStories.map((story) => (
           <li
-            key={story.id}
-            className={`mb-4 border p-4 rounded-lg dark:bg-gray-800 dark:text-white dark:border-black dark:border-3 ${
-              selectedStoryId === story.id ? "dark:bg-sky-800 bg-blue-100" : "bg-white"
-            }`}
+            key={story._id}
+            className={`mb-4 border p-4 rounded-lg transition-colors ${
+              selectedStoryId === story._id
+                ? "bg-blue-100 dark:bg-sky-800"
+                : "bg-white dark:bg-gray-800"
+            } dark:text-white`}
           >
-            <div >
-              <h3 className="font-bold text-blue-500">{story.name}</h3>
-              <p className="text-gray-600 dark:text-white">{story.description}</p>
-              <p className="text-sm text-gray-500 dark:text-white"><b>Status: </b>{story.state}</p>
-            </div>
+            <h3 className="font-bold text-blue-500">{story.name}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{story.description}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              <strong>Status:</strong> {story.state}
+            </p>
             <div className="mt-2 flex space-x-2">
               <button
                 onClick={() => handleSelectStory(story)}
-                className="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
               >
                 Select
               </button>
               <button
-                onClick={() => handleDeleteStory(story.id)}
-                className="bg-red-500 text-black px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+                onClick={() => handleDeleteStory(story._id)}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
               >
                 Delete
               </button>
               <button
                 onClick={() => onStoryDetails(story)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
                 Details
               </button>
@@ -83,3 +111,5 @@ export const StoryList = ({ projectId, onSelectStory, onStoryDetails, refreshKey
     </div>
   );
 };
+
+export default StoryList;
