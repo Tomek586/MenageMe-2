@@ -1,4 +1,3 @@
-// src/App.jsx
 import { useState, useEffect, useRef } from "react";
 import { Navbar } from "./components/Navbar";
 import { ProjectForm } from "./components/ProjectForm";

@@ -1,52 +1,58 @@
-# 🛠️ ManagMe 
+# ManagMe — Instrukcja uruchomienia i logowania
 
----
+## Wymagania wstępne
+- Node.js 
+- MongoDB 
+- Konto Google i utworzone OAuth Client ID (opcjonalnie)
 
-## 🔧 Jak uruchomić projekt lokalnie
+## Konfiguracja
 
-### 1. Sklonuj repozytorium
+1. Sklonuj repozytorium i przejdź do katalogu:
 
-```bash
-git clone https://github.com/twoj-login/MenageMe-2.git
-cd MenageMe-2
-```
+   git clone https://github.com/Tomek586/MenageMe-2.git
+   cd MenageMe-2
 
-### 2. Zainstaluj zależności frontendowe
+2. Stwórz plik backend/.env:
 
-```bash
-npm install
-```
+                PORT=3001
+                MONGO_URI= <Twój_URI_do_MongoDB>
+                JWT_SECRET= <Twój_klucz_JWT>
+                REFRESH_SECRET= <Twój_klucz_refresh>
+                GOOGLE_CLIENT_ID= <Twój_Google_Client_ID>
+                GOOGLE_CLIENT_SECRET= <Twój_Google_Client_Secret>
 
-### 3. Uruchom aplikację frontend (Vite)
+    Stwórz plik .env w katalogu frontendu:
+                
+                VITE_GOOGLE_CLIENT_ID=<Twój_Google_Client_ID>
 
-```bash
-npm run dev
-```
+3. Uruchomienie frontendu
 
-Domyślnie aplikacja uruchomi się na `http://localhost:5173`
+        cd frontend
+        npm install
+        npm run dev
 
----
+4. Utworzenie konta admina 
+        Otwórz mongo shell lub MongoDB Compass.
 
-### 4. Uruchom backend (miniapi)
+        W kolekcji users wstaw dokument:
 
-```bash
-cd src/miniapi
-npm install
-node index.js
-```
+                        {
+                        email:        "admin@example.com",
+                        firstName:    "Admin",
+                        lastName:     "User",
+                        passwordHash: "<hash bcrypt dla np. 'admin123'>",
+                        role:         "admin"
+                        }
 
-Backend działa na porcie `http://localhost:3001`
+                        Hash generujesz poleceniem: node -e "console.log(require('bcryptjs').hashSync('admin123',10))"
 
----
+5. Logowanie
 
-## 👤 Przykładowi użytkownicy do logowania
+                Konto lokalne (pełne uprawnienia CRUD)
+                    Email: admin@example.com
+                    Hasło: admin123
 
-| Login | Hasło | Rola      |
-|-------|-------|-----------|
-| admin | admin | admin     |
-| dev   | dev   | developer |
-| ops   | ops   | devops    |
-
----
-
-> Dane użytkowników są mockowane – logowanie działa z wykorzystaniem JWT tokenu i lokalnego `miniapi`.
+6. Logowanie przez Google (rola guest — tylko odczyt)
+    -W aplikacji kliknij Zaloguj z Google.
+    -Wybierz konto Google.
+    -Otrzymasz rolę guest (tylko odczyt).

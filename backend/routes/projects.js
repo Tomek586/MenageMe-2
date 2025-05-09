@@ -42,31 +42,37 @@ router.put(
   }
 );
 
-// DELETE /api/projects/:id (z kaskadą)
+// DELETE /api/projects/:id  usuwanie razem z powiazanymi stories i task
 router.delete(
-    "/:id",
-    authenticateToken,
-    authorizeRole("admin","devops","developer"),
-    async (req,res) => {
-      console.log("🌪️ DELETE /api/projects/", req.params.id);  // ← zobaczymy w logu
-      try {
-        const pid = new mongoose.Types.ObjectId(req.params.id);
-        const stories = await Story.find({ projectId: pid }).select("_id");
-        const storyIds = stories.map(s=>s._id);
-        if (storyIds.length) {
-          console.log(`Deleting tasks for storyIds=${storyIds}`);
-          await Task.deleteMany({ storyId: { $in: storyIds } });
-        }
-        console.log(`Deleting ${stories.length} stories`);
-        await Story.deleteMany({ projectId: pid });
-        console.log("Deleting project", pid);
-        await Project.findByIdAndDelete(pid);
-        return res.sendStatus(204);
-      } catch(err) {
-        console.error("Cascade delete failed:", err);
-        return res.status(500).json({ error:"Failed to cascade delete" });
+  "/:id",
+  authenticateToken,
+  authorizeRole("admin","devops","developer"),
+  async (req, res) => {
+    try {
+      const projectId = req.params.id;
+      const pid = new mongoose.Types.ObjectId(projectId);
+
+      // 1) Pobierz wszystkie story dla tego projektu
+      const stories = await Story.find({ projectId: pid }).select("_id");
+      const storyIds = stories.map(s => s._id);
+
+      // 2) Usuń wszystkie taski powiązane z tymi story
+      if (storyIds.length) {
+        await Task.deleteMany({ storyId: { $in: storyIds } });
       }
+
+      // 3) Usuń te story
+      await Story.deleteMany({ projectId: pid });
+
+      // 4) Usuń sam projekt
+      await Project.findByIdAndDelete(pid);
+
+      return res.sendStatus(204);
+    } catch (err) {
+      console.error("Cascade delete failed:", err);
+      return res.status(500).json({ error: "Nie udało się usunąć projektu i powiązanych zadan i historyjek" });
     }
-  );
-  
-  export default router;
+  }
+);
+
+export default router;

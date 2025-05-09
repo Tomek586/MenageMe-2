@@ -1,5 +1,7 @@
 import express from "express";
+import mongoose from "mongoose";
 import Story from "../models/Story.js";
+import Task  from "../models/Task.js";
 import { authenticateToken } from "../middleware/authenticate.js";
 import { authorizeRole } from "../middleware/authorize.js";
 
@@ -31,13 +33,27 @@ router.put(
   }
 );
 
+// DELETE /api/stories/:id  
 router.delete(
   "/:id",
   authenticateToken,
-  authorizeRole("admin", "devops", "developer"),
+  authorizeRole("admin","devops","developer"),
   async (req, res) => {
-    await Story.findByIdAndDelete(req.params.id);
-    res.sendStatus(204);
+    try {
+      const storyId = req.params.id;
+      const sid = new mongoose.Types.ObjectId(storyId);
+
+      // 1) Usuń wszystkie taski powiązane
+      await Task.deleteMany({ storyId: sid });
+
+      // 2) Usuń story
+      await Story.findByIdAndDelete(sid);
+
+      return res.sendStatus(204);
+    } catch (err) {
+      console.error("Cascade delete story failed:", err);
+      return res.status(500).json({ error: "Nie udało się usunąć historyjki i jej zadań" });
+    }
   }
 );
 
