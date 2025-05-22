@@ -19,7 +19,7 @@ router.post("/login", async (req, res) => {
   }
   const payload = { id: user._id, role: user.role };
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "5m",
+    expiresIn: "1h",
   });
   const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_SECRET, {
     expiresIn: "1d",
@@ -30,12 +30,12 @@ router.post("/login", async (req, res) => {
 // GOOGLE OAUTH
 router.post("/google", async (req, res) => {
   const { token } = req.body;
-  // 1) verify with Google
+  //weryfkikacja z Google
   const { data } = await axios.get(
     `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
   );
   const { sub: googleId, email, given_name, family_name } = data;
-  // 2) find or create
+ 
   let user = await User.findOne({ googleId });
   if (!user) {
     user = await User.create({
@@ -46,10 +46,10 @@ router.post("/google", async (req, res) => {
       role: "guest",
     });
   }
-  // 3) jwt
+  //jwt
   const payload = { id: user._id, role: user.role };
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "5m",
+    expiresIn: "1h",
   });
   const refreshToken = jwt.sign(
     { id: user._id },
@@ -65,7 +65,7 @@ router.post("/refresh", (req, res) => {
   try {
     const { id } = jwt.verify(token, process.env.REFRESH_SECRET);
     const accessToken = jwt.sign({ id }, process.env.JWT_SECRET, {
-      expiresIn: "5m",
+      expiresIn: "1h",
     });
     res.json({ accessToken });
   } catch {

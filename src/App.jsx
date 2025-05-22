@@ -37,7 +37,7 @@ export const App = () => {
   const taskDetailsRef = useRef(null);
   const storyDetailsRef = useRef(null);
 
-  // --- ładowanie użytkownika
+  //ładowanie użytkownika
   useEffect(() => {
     const init = async () => {
       if (isLoggedIn()) {
@@ -49,7 +49,7 @@ export const App = () => {
     init();
   }, []);
 
-  // --- ładowanie projektów po zalogowaniu
+  //ładowanie projektów po zalogowaniu
   useEffect(() => {
     const loadProjects = async () => {
       try {
@@ -63,7 +63,7 @@ export const App = () => {
     if (user) loadProjects();
   }, [user]);
 
-  // --- ładowanie historyjek po wyborze projektu lub refreshKey
+  //ładowanie historyjek po wyborze projektu
   useEffect(() => {
     const loadStories = async () => {
       if (!selectedProject) return setStories([]);
@@ -79,7 +79,7 @@ export const App = () => {
     loadStories();
   }, [selectedProject, storyRefreshKey]);
 
-  // --- ładowanie zadań po wyborze historyjki
+  //ładowanie zadań po wyborze historyjki
   useEffect(() => {
     const loadTasks = async () => {
       if (!selectedStory) {
@@ -99,7 +99,6 @@ export const App = () => {
     loadTasks();
   }, [selectedStory]);
 
-  // --- po udanym logowaniu
   const handleLoginSuccess = () => {
     fetchUser().then((me) => {
       if (!me) return logout();
@@ -107,7 +106,6 @@ export const App = () => {
     });
   };
 
-  // --- po dodaniu projektu
   const handleProjectAdded = async () => {
     try {
       const data = await projectService.getProjects();
@@ -134,6 +132,12 @@ export const App = () => {
       const data = await projectService.getProjects();
       setProjects(Array.isArray(data) ? data : []);
       setSelectedProject(null);
+      setSelectedProject(null);
+      setStories([]);
+      setSelectedStory(null);
+      setTasks([]);
+      setSelectedTask(null);
+      setSelectedStoryDetails(null);
     } catch {
       setProjects([]);
     }
@@ -144,6 +148,8 @@ export const App = () => {
     setTimeout(() => {
       storyDetailsRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
+    
+    
   };
 
   const handleSelectStory = (story) => {
@@ -157,6 +163,7 @@ export const App = () => {
       taskDetailsRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
+  
 
   if (!user) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
@@ -189,7 +196,7 @@ export const App = () => {
             )}
           </div>
 
-          {/* Historyjki */}
+          {/* Stories*/}
           <div>
             {selectedProject && (
               <>
@@ -203,20 +210,25 @@ export const App = () => {
                   onSelectStory={handleSelectStory}
                   onStoryDetails={handleShowStoryDetails}
                   refreshKey={storyRefreshKey}
+                  
                 />
-                {selectedStoryDetails && (
-                  <div ref={storyDetailsRef}>
-                    <StoryDetails
-                      story={selectedStoryDetails}
-                      onClose={() => setSelectedStoryDetails(null)}
-                    />
-                  </div>
-                )}
+               {selectedStoryDetails && (
+  <div ref={storyDetailsRef}>
+    <StoryDetails
+      story={selectedStoryDetails}
+      onClose={() => setSelectedStoryDetails(null)}
+      onStatusChanged={(updated) => {
+        setSelectedStoryDetails(updated);
+        setStoryRefreshKey(k => k + 1);
+      }}
+    />
+  </div>
+)}
               </>
             )}
           </div>
 
-          {/* Zadania */}
+          {/* taski */}
           <div>
             {selectedStory && (
               <>

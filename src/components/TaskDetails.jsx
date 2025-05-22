@@ -76,37 +76,37 @@ const TaskDetails = ({ taskId, onClose, onTaskUpdated }) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">{task.name}</h2>
         <button onClick={onClose} className="text-red-500 hover:underline">
-          Zamknij
+          Close
         </button>
       </div>
 
       <p className="mb-2">{task.description}</p>
-      <p><strong>Priorytet:</strong> {task.priority}</p>
+      <p><strong>Priority:</strong> {task.priority}</p>
       <p><strong>Status:</strong> {task.state}</p>
-      <p><strong>Szacowany czas:</strong> {task.estimatedTime} h</p>
-      <p><strong>Utworzono:</strong> {new Date(task.createdAt).toLocaleString()}</p>
+      <p><strong>Hours:</strong> {task.estimatedTime} h</p>
+      <p><strong>Created at:</strong> {new Date(task.createdAt).toLocaleString()}</p>
       {task.startDate && (
-        <p><strong>Rozpoczęto:</strong> {new Date(task.startDate).toLocaleString()}</p>
+        <p><strong>Started:</strong> {new Date(task.startDate).toLocaleString()}</p>
       )}
       {task.endDate && (
-        <p><strong>Zakończono:</strong> {new Date(task.endDate).toLocaleString()}</p>
+        <p><strong>Finished:</strong> {new Date(task.endDate).toLocaleString()}</p>
       )}
       {story && (
-        <p><strong>Historyjka:</strong> {story.name}</p>
+        <p><strong>Story:</strong> {story.name}</p>
       )}
       {assignedObj && (
-        <p><strong>Przypisany:</strong> {assignedObj.firstName} {assignedObj.lastName}</p>
+        <p><strong>Assigned:</strong> {assignedObj.firstName} {assignedObj.lastName}</p>
       )}
 
       {task.state === "todo" && (
         <div className="mt-4">
-          <label className="block mb-1">Przypisz do:</label>
+          <label className="block mb-1">Assign to:</label>
           <select
             value={assignedUserId}
             onChange={(e) => setAssignedUserId(e.target.value)}
             className="border p-2 rounded w-full mb-2 dark:bg-gray-700 dark:text-white"
           >
-            <option value="">Wybierz użytkownika</option>
+            <option value="">Select a user</option>
             {users
               .filter((u) => u.role !== "admin")
               .map((u) => (
@@ -119,14 +119,14 @@ const TaskDetails = ({ taskId, onClose, onTaskUpdated }) => {
             onClick={handleAssignUser}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
-            Przypisz i rozpocznij
+            Assign and get started
           </button>
         </div>
       )}
 
       {task.state === "doing" && (
         <div className="mt-4">
-          <label className="block mb-1">Roboczogodziny:</label>
+          <label className="block mb-1">Working hours:</label>
           <input
             type="number"
             min="0"
@@ -138,14 +138,14 @@ const TaskDetails = ({ taskId, onClose, onTaskUpdated }) => {
             onClick={handleCompleteTask}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
           >
-            Zakończ zadanie
+            Finish the task
           </button>
         </div>
       )}
 
       {task.state === "done" && (
         <div className="mt-4">
-          <p><strong>Roboczogodziny:</strong> {task.workHours} h</p>
+          <p><strong>Working hours:</strong> {task.workHours} h</p>
         </div>
       )}
     </div>

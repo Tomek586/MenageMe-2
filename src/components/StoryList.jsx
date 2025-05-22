@@ -64,10 +64,10 @@ export const StoryList = ({
           onChange={(e) => setFilter(e.target.value)}
           className="border p-2 rounded dark:bg-gray-700 dark:text-white"
         >
-          <option value="all">Wszystkie</option>
-          <option value="todo">Do zrobienia</option>
-          <option value="doing">W trakcie</option>
-          <option value="done">Zrobione</option>
+          <option value="all">All</option>
+          <option value="todo">To do</option>
+          <option value="doing">Doing</option>
+          <option value="done">Done</option>
         </select>
       </div>
       <ul>

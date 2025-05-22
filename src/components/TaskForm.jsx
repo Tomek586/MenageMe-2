@@ -4,7 +4,7 @@ import * as taskService from "../services/taskService";
 export const TaskForm = ({ storyId, onTaskAdded }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium");
+  const [priority, setPriority] = useState("low");
   const [estimatedTime, setEstimatedTime] = useState("");
 
   const handleSubmit = async (e) => {
@@ -49,21 +49,22 @@ export const TaskForm = ({ storyId, onTaskAdded }) => {
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+          <label class="block text-sm font-medium text-gray-700 dark:text-white">Priority</label>
         <select
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
-          className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         >
-          <option value="low">Niski</option>
-          <option value="medium">Średni</option>
-          <option value="high">Wysoki</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
         </select>
         <input
           type="number"
-          placeholder="Estimated Hours"
+          placeholder="Hours"
           value={estimatedTime}
           onChange={(e) => setEstimatedTime(e.target.value)}
-          className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
           required
           min="0"
         />

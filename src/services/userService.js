@@ -29,7 +29,7 @@ function authHeader() {
 	  return [];
 	}
 	if (!res.ok) throw new Error(`HTTP ${res.status}`);
-	return res.json();  // [{id, firstName, lastName, role}, …]
+	return res.json();
   }
 
 

@@ -36,34 +36,70 @@ const StoryDetails = ({ story, onClose, onStatusChanged }) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">{story.name}</h2>
         <button onClick={onClose} className="text-red-500 hover:underline">
-          Zamknij
+          Close
         </button>
       </div>
 
       <p className="mb-2 dark:text-gray-300">{story.description}</p>
-      <p><strong>Priorytet:</strong> {story.priority}</p>
+      <p><strong>Priority:</strong> {story.priority}</p>
       <p><strong>Status:</strong> {story.state}</p>
-      <p><strong>Data utworzenia:</strong> {new Date(story.createdAt).toLocaleString()}</p>
+      <p><strong>Created at:</strong> {new Date(story.createdAt).toLocaleString()}</p>
       {owner && (
-        <p><strong>Właściciel:</strong> {owner.firstName} {owner.lastName}</p>
+        <p><strong>Owner:</strong> {owner.firstName} {owner.lastName}</p>
       )}
 
       <div className="flex gap-4 mt-4">
-        {story.state !== "doing" && (
-          <button
+        {story.state == "doing" && (
+          <>  <button
+            onClick={() => handleStatusChange("done")}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+          >
+            Mark as „done”
+          </button>
+           <button
+            onClick={() => handleStatusChange("todo")}
+            className="bg-blue-400 text-black px-4 py-2 rounded hover:bg-blue-500 transition-colors"
+          >
+            Mark as "todo"
+          </button>
+          </>
+         
+          
+          
+        )}
+        
+        {story.state == "done" && (
+          <>
+           <button
             onClick={() => handleStatusChange("doing")}
             className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500 transition-colors"
           >
-            Oznacz jako „doing”
+            Mark as "doing"
           </button>
+            <button
+            onClick={() => handleStatusChange("todo")}
+            className="bg-blue-400 text-black px-4 py-2 rounded hover:bg-blue-500 transition-colors"
+          >
+            Mark as "todo"
+          </button>
+          </>
         )}
-        {story.state !== "done" && (
+
+          {story.state == "todo" && (
+          <>
           <button
             onClick={() => handleStatusChange("done")}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
           >
-            Oznacz jako „done”
+            Mark as „done”
           </button>
+           <button
+            onClick={() => handleStatusChange("doing")}
+            className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500 transition-colors"
+          >
+            Mark as "doing"
+          </button>
+          </>
         )}
       </div>
     </div>

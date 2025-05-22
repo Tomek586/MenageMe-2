@@ -5,7 +5,7 @@ import * as storyService from "../services/storyService";
 export const StoryForm = ({ projectId, onStoryAdded }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium");
+  const [priority, setPriority] = useState("low");
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -59,14 +59,15 @@ export const StoryForm = ({ projectId, onStoryAdded }) => {
           className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+        <label class="block text-sm font-medium text-gray-700 dark:text-white">Priority</label>
         <select
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
-          className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  dark:bg-gray-700 dark:text-white"
         >
-          <option value="low">Niski</option>
-          <option value="medium">Średni</option>
-          <option value="high">Wysoki</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
         </select>
         <button
           type="submit"
