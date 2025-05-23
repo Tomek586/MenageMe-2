@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { fetchUser } from "../services/authService";
 import * as storyService from "../services/storyService";
 
-export const StoryForm = ({ projectId, onStoryAdded }) => {
+export const StoryForm = ({ projectId, onStoryAdded, storyToEdit, onCancelEdit }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("low");
@@ -15,31 +15,36 @@ export const StoryForm = ({ projectId, onStoryAdded }) => {
     };
     load();
   }, []);
+  useEffect(() => {
+  if (storyToEdit) {
+    setName(storyToEdit.name);
+    setDescription(storyToEdit.description);
+    setPriority(storyToEdit.priority);
+  } else {
+    setName("");
+    setDescription("");
+    setPriority("medium");
+  }
+}, [storyToEdit]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) return alert("Nie załadowano użytkownika");
-
-    const newStory = {
-      name,
-      description,
-      priority,
-      projectId,
-      state: "todo",
-      ownerId: user._id,
-    };
-
-    try {
-      await storyService.addStory(newStory);
-      onStoryAdded();
-      setName("");
-      setDescription("");
-      setPriority("medium");
-    } catch (err) {
-      console.error("Błąd dodawania story:", err);
-      alert("Nie udało się dodać historyjki.");
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const payload = {
+    name,
+    description,
+    priority,
+    projectId,
+    state: storyToEdit ? storyToEdit.state : "todo",
+    ownerId: user._id,
+    _id: storyToEdit?._id
   };
+  if (storyToEdit) {
+    await storyService.updateStory(payload);
+  } else {
+    await storyService.addStory(payload);
+  }
+  onStoryAdded();
+};
 
   return (
     <form onSubmit={handleSubmit} className="mb-6">
@@ -69,13 +74,24 @@ export const StoryForm = ({ projectId, onStoryAdded }) => {
           <option value="medium">Medium</option>
           <option value="high">High</option>
         </select>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"
-          disabled={!user}
-        >
-          Add Story
-        </button>
+      <div className="flex space-x-2">
+  <button
+    type="submit"
+    className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"
+    disabled={!user}
+  >
+    {storyToEdit ? "Update Story" : "Add Story"}
+  </button>
+  {storyToEdit && (
+    <button
+      type="button"
+      onClick={onCancelEdit}
+      className="bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600 transition-colors"
+    >
+      Cancel
+    </button>
+  )}
+</div>
       </div>
     </form>
   );

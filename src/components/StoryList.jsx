@@ -9,6 +9,7 @@ export const StoryList = ({
   onSelectStory,
   onStoryDetails,
   refreshKey,
+  onEditStory,
 }) => {
   const [stories, setStories] = useState([]);
   const [selectedStoryId, setSelectedStoryId] = useState(null);
@@ -91,6 +92,12 @@ export const StoryList = ({
                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
               >
                 Select
+              </button>
+              <button
+                onClick={() => onEditStory(story)}
+                className="bg-yellow-500 text-black px-4 py-2 rounded hover:bg-yellow-600"
+              >
+                Edit
               </button>
               <button
                 onClick={() => handleDeleteStory(story._id)}

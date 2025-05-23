@@ -33,6 +33,8 @@ export const App = () => {
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [storyRefreshKey, setStoryRefreshKey] = useState(0);
   const [selectedStoryDetails, setSelectedStoryDetails] = useState(null);
+  
+  const [storyToEdit, setStoryToEdit] = useState(null);  
 
   const taskDetailsRef = useRef(null);
   const storyDetailsRef = useRef(null);
@@ -201,15 +203,21 @@ export const App = () => {
             {selectedProject && (
               <>
                 <StoryForm
-                  projectId={selectedProject._id}
-                  onStoryAdded={() => setStoryRefreshKey((k) => k + 1)}
-                />
+      projectId={selectedProject._id}
+      storyToEdit={storyToEdit}                          
+      onStoryAdded={() => {
+        setStoryRefreshKey((k) => k + 1);
+        setStoryToEdit(null);                               
+      }}
+      onCancelEdit={() => setStoryToEdit(null)}            
+    />
                 <StoryList
                   projectId={selectedProject._id}
                   stories={stories}
                   onSelectStory={handleSelectStory}
                   onStoryDetails={handleShowStoryDetails}
                   refreshKey={storyRefreshKey}
+                  onEditStory={setStoryToEdit} 
                   
                 />
                {selectedStoryDetails && (
